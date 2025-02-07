@@ -10,6 +10,18 @@ import {
 export async function POST(request: Request) {
   const dialout_data = await request.json();
 
+  console.log('Dialout request body:', {
+    dialout_data,
+    hasDialoutData: !!dialout_data,
+  });
+
+  if (!process.env.DAILY_BOTS_API_KEY) {
+    console.error('DAILY_BOTS_API_KEY is not set in environment variables');
+    return new Response('Server configuration error: Missing API key', {
+      status: 500,
+    });
+  }
+
   if (!dialout_data || !process.env.DAILY_BOTS_URL) {
     return new Response(
       `dialout_data or phoneNumber not found on request body`,
@@ -41,6 +53,13 @@ export async function POST(request: Request) {
   });
 
   const res = await req.json();
+
+  console.log('Daily Bots API response:', {
+    status: req.status,
+    statusText: req.statusText,
+    headers: Object.fromEntries(req.headers.entries()),
+    body: res
+  });
 
   if (req.status !== 200) {
     return Response.json(res, { status: req.status });

@@ -10,6 +10,21 @@ import {
 export async function POST(request: Request) {
   const { test, callId, callDomain } = await request.json();
 
+  console.log('Dialin request body:', {
+    test,
+    callId,
+    callDomain,
+    hasCallId: !!callId,
+    hasCallDomain: !!callDomain,
+  });
+
+  if (!process.env.DAILY_BOTS_API_KEY) {
+    console.error('DAILY_BOTS_API_KEY is not set in environment variables');
+    return new Response('Server configuration error: Missing API key', {
+      status: 500,
+    });
+  }
+
   //@TODO: HMAC header verification
 
   if (test) {
@@ -48,6 +63,13 @@ export async function POST(request: Request) {
   });
 
   const res = await req.json();
+
+  console.log('Daily Bots API response:', {
+    status: req.status,
+    statusText: req.statusText,
+    headers: Object.fromEntries(req.headers.entries()),
+    body: res
+  });
 
   if (req.status !== 200) {
     return Response.json(res, { status: req.status });
